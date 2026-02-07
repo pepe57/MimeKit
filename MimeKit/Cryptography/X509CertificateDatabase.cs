@@ -434,6 +434,34 @@ namespace MimeKit.Cryptography {
 				throw new ObjectDisposedException (GetType ().Name);
 		}
 
+		/// <summary>
+		/// Execute a database command.
+		/// </summary>
+		/// <remarks>
+		/// <para>Executes the <see cref="DbCommand.ExecuteReader()"/> method.</para>
+		/// <para>This method is intended to be overridden by subclasses to patch commands before execution or to log them.</para>
+		/// </remarks>
+		/// <param name="command">The command to be executed.</param>
+		/// <returns>The database reader.</returns>
+		protected virtual DbDataReader ExecuteReader (DbCommand command)
+		{
+			return command.ExecuteReader ();
+		}
+
+		/// <summary>
+		/// Execute a non-query database command.
+		/// </summary>
+		/// <remarks>
+		/// <para>Executes the <see cref="DbCommand.ExecuteNonQuery()"/> method.</para>
+		/// <para>This method is intended to be overridden by subclasses to patch commands before execution or to log them.</para>
+		/// </remarks>
+		/// <param name="command">The command to be executed.</param>
+		/// <returns>The number of rows affected.</returns>
+		protected virtual int ExecuteNonQuery (DbCommand command)
+		{
+			return command.ExecuteNonQuery ();
+		}
+
 		internal static string? EncodeDnsNames (string[]? dnsNames)
 		{
 			if (dnsNames == null)
@@ -995,7 +1023,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetSelectCommand (connection, certificate, fields)) {
-				using (var reader = command.ExecuteReader ()) {
+				using (var reader = ExecuteReader (command)) {
 					if (reader.Read ()) {
 						var parser = new X509CertificateParser ();
 						var buffer = new byte[4096];
@@ -1026,7 +1054,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetSelectCommand (connection, selector, false, false, X509CertificateRecordFields.Certificate)) {
-				using (var reader = command.ExecuteReader ()) {
+				using (var reader = ExecuteReader (command)) {
 					var parser = new X509CertificateParser ();
 					var buffer = new byte[4096];
 
@@ -1061,7 +1089,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetSelectCommand (connection, selector, false, true, PrivateKeyFields)) {
-				using (var reader = command.ExecuteReader ()) {
+				using (var reader = ExecuteReader (command)) {
 					var parser = new X509CertificateParser ();
 					var buffer = new byte[4096];
 
@@ -1106,7 +1134,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetSelectCommand (connection, mailbox, now, requirePrivateKey, fields)) {
-				using (var reader = command.ExecuteReader ()) {
+				using (var reader = ExecuteReader (command)) {
 					var parser = new X509CertificateParser ();
 					var buffer = new byte[4096];
 
@@ -1139,7 +1167,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetSelectCommand (connection, selector, trustedAnchorsOnly, false, fields | X509CertificateRecordFields.Certificate)) {
-				using (var reader = command.ExecuteReader ()) {
+				using (var reader = ExecuteReader (command)) {
 					var parser = new X509CertificateParser ();
 					var buffer = new byte[4096];
 
@@ -1178,7 +1206,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetInsertCommand (connection, record))
-				command.ExecuteNonQuery ();
+				ExecuteNonQuery (command);
 		}
 
 		/// <summary>
@@ -1202,7 +1230,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetDeleteCommand (connection, record))
-				command.ExecuteNonQuery ();
+				ExecuteNonQuery (command);
 		}
 
 		/// <summary>
@@ -1227,7 +1255,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetUpdateCommand (connection, record, fields))
-				command.ExecuteNonQuery ();
+				ExecuteNonQuery (command);
 		}
 
 		/// <summary>
@@ -1254,7 +1282,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetSelectCommand (connection, issuer, fields)) {
-				using (var reader = command.ExecuteReader ()) {
+				using (var reader = ExecuteReader (command)) {
 					var parser = new X509CrlParser ();
 					var buffer = new byte[4096];
 
@@ -1291,7 +1319,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetSelectCommand (connection, crl, fields)) {
-				using (var reader = command.ExecuteReader ()) {
+				using (var reader = ExecuteReader (command)) {
 					if (reader.Read ()) {
 						var parser = new X509CrlParser ();
 						var buffer = new byte[4096];
@@ -1325,7 +1353,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetInsertCommand (connection, record))
-				command.ExecuteNonQuery ();
+				ExecuteNonQuery (command);
 		}
 
 		/// <summary>
@@ -1349,7 +1377,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetDeleteCommand (connection, record))
-				command.ExecuteNonQuery ();
+				ExecuteNonQuery (command);
 		}
 
 		/// <summary>
@@ -1374,7 +1402,7 @@ namespace MimeKit.Cryptography {
 			CheckDisposed ();
 
 			using (var command = GetUpdateCommand (connection, record))
-				command.ExecuteNonQuery ();
+				ExecuteNonQuery (command);
 		}
 
 		/// <summary>
@@ -1394,7 +1422,7 @@ namespace MimeKit.Cryptography {
 			var crls = new List<X509Crl> ();
 
 			using (var command = GetSelectAllCrlsCommand (connection)) {
-				using (var reader = command.ExecuteReader ()) {
+				using (var reader = ExecuteReader (command)) {
 					var parser = new X509CrlParser ();
 					var buffer = new byte[4096];
 
