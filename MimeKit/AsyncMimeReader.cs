@@ -158,7 +158,7 @@ namespace MimeKit {
 					left = await ReadAheadAsync (2, 0, cancellationToken).ConfigureAwait (false);
 
 				if (left == 0) {
-					// Note: The only way to get here is if this is the first-pass throgh this loop and we're at EOF, so headerCount should ALWAYS be 0.
+					// Note: The only way to get here is if this is the first-pass through this loop and we're at EOF, so headerCount should ALWAYS be 0.
 
 					if (toplevel && headerCount == 0) {
 						// EOF has been reached before any headers have been parsed for Parse[Headers,Entity,Message]Async.
